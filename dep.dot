@@ -1,0 +1,10 @@
+digraph dis {
+"libsysfs.so.2" -> "linux-gate.so.1";
+"libsysfs.so.2" -> "libc.so.6";
+"libsysfs.so.2" -> "/lib/ld-linux.so.2";
+"libncurses.so.5" -> "linux-gate.so.1";
+"libncurses.so.5" -> "libc.so.6";
+"libncurses.so.5" -> "libdl.so.2";
+"libncurses.so.5" -> "libtinfo.so.5";
+"libncurses.so.5" -> "/lib/ld-linux.so.2";
+}
