@@ -1,0 +1,6 @@
+*
+!*.sh
+!*.pl
+!Makefile
+!.git*
+!*.txt

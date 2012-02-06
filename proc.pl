@@ -1,16 +1,15 @@
 #!/usr/bin/perl
 
-open F, "find /lib /usr/lib -name '*so*' |";
+open F, "ls /proc/*/exe | xargs -i@ readlink @ | sort | uniq |";
 my $i = 0;
 while (<F>) {
-	next unless /so\.[^.]+$/;
-	my $so = `basename $_`;
-	chomp $so;
-	$i++;
-	exit if ($i == 3);
-	open L, "./ldd.sh $_ |";
+	chomp;
+	my $e = $_;
+	open L, "./ldd.sh $e |";
 	while (<L>) {
 		chomp;
-		print "$so $_\n";
+		print "$e $_\n";
 	}
+	$i++;
+	exit if $i == 3;
 }

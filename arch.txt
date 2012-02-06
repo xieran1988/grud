@@ -1,0 +1,14 @@
+
+
+big graph:
+vertex: proc, file, lib
+	- TCB, NON-TCB
+edge:
+	- proc fork proc times, stap
+	- proc dep/load lib
+	- proc rw/mmap/rm file times
+
+client node graphset:
+	- user files: nfs
+	- user procs: ssh, vnc
+	- user tcp/udp procs
