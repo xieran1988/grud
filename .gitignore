@@ -1,6 +1,8 @@
 *
 !*.sh
 !*.pl
+!*.py
 !Makefile
 !.git*
 !*.txt
+!*.stp

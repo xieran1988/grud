@@ -1,0 +1,20 @@
+				
+global syscalllist
+
+probe begin {
+  printf("System Call Monitoring Started (10 seconds)...\n")
+}
+
+probe syscall.*
+{
+  syscalllist[pid(), execname()]++
+}
+
+probe timer.ms(10000) {
+  foreach ( [pid, procname] in syscalllist ) {
+    printf("%s[%d] = %d\n", procname, pid, syscalllist[pid, procname] )
+  }
+  exit()
+}
+
+

@@ -1,14 +1,20 @@
 
 
 big graph:
-vertex: proc, file, lib
+node: proc, file, lib
 	- TCB, NON-TCB
 edge:
 	- proc fork proc times, stap
 	- proc dep/load lib
-	- proc rw/mmap/rm file times
+	- proc rw/mmap/rm file times, stap
 
 client node graphset:
-	- user files: nfs
-	- user procs: ssh, vnc
-	- user tcp/udp procs
+	- user tcp/udp procs: sockstat
+		#- nfs files
+		- user procs: ssh, vnc
+		- port bind proc type
+		- workload => concern level
+		- port => service type => concern level
+
+concern level: node attr
+
