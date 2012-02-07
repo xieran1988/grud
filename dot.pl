@@ -1,6 +1,9 @@
 #!/usr/bin/perl
 
-print "digraph dis {\n";
+print <<EOF;
+digraph dis {
+	graph [size="400,400"];
+EOF
 while (<>) {
 	chomp;
 	my @a = split /\t/; 
