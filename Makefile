@@ -1,6 +1,5 @@
 
-
-all: algo-graph.png
+all: algo.graph
 
 results := inoderw.result netuse.result pstree.result 
 
@@ -15,24 +14,20 @@ algo.graph: algo.py proc2so.cache so2so.cache ${results}
 algo-graph.dot: dot.pl algo.graph
 	./dot.pl < algo.graph > $@
 
-%.cache: %.list update_marshal.py
-	./update_marshal.py $@ $<
+%.cache: %.pl update_marshal.py force
+	mkdir -p $*
+	./$<
+	cat $*/* | ./update_marshal.py $@
 
 netuse.result:
-	echo "sshd	22" > $@
+	sudo lsof -i4 | sed '1d' | awk '{print $$1,$$8,$$9}' | ./netuse.pl > $@
 
 inoderw.result:
-	echo "awk	332cc" > $@
+	sudo stap inode.stp > $@
 
 pstree.result:
 	echo "bash	ls" > $@
 	echo "ls	ls" >> $@
-
-proc2so.list: ${results} ldd.pl
-	cat ${results} | awk '{print $$1}' | sort | uniq | xargs -i@ which @ | ./ldd.pl > $@
-
-so2so.list: ldd.pl
-	sudo find /usr/lib/ -name '*so*' | grep 'so\.[^\.]*$$'| ./ldd.pl > $@
 
 clean:
 	rm -rf *.result proc2so.list

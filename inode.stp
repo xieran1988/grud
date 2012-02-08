@@ -6,5 +6,5 @@ probe
 	} else {
 		ino = $file->f_dentry->d_inode->i_ino;
 	}
-	printf("%s,%d,%s,%x,\n", execname(), pid(), probefunc(), ino)
+	printf("%s\t%x\n", execname(), ino);
 }

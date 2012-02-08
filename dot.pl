@@ -2,7 +2,9 @@
 
 print <<EOF;
 digraph dis {
-	graph [size="400,400"];
+	ratio=auto;
+	size="7,7";
+	ranksep="1.0 equally";
 EOF
 while (<>) {
 	chomp;
