@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import marshal
+import marshal, socket
 
 V = {}
 E = {}
@@ -18,33 +18,41 @@ def add_so(so):
 def add_proc(proc):
 	if proc not in V:
 		V[proc] = 'p'
-		for so in proc2so[proc]:
-			add_so(so)
-			if proc not in E:
-				E[proc] = {}
-			E[proc][so] = 1
+		if proc in proc2so:
+			for so in proc2so[proc]:
+				add_so(so)
+				if proc not in E:
+					E[proc] = {}
+				E[proc][so] = 1
 
 def add_edge(a, b):
 	if a not in E:
 		E[a] = {}
 	E[a][b] = 1
 
-for l in open('inoderw.result').readlines():
-	proc, inode = l.strip().split('\t')
-	add_proc(proc)
-	add_inode(inode)
-	add_edge(inode, proc)
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
+s.bind(('', 1900))
+while 1:
+	msg, addr = s.recvfrom(65536)
+	print 'msg=,',msg
+	a = msg.strip().split('\t')
+	func = a[0]
+	if func == 'ext4_file_mmap': 
+		proc, inode = a[1:]
+		add_proc(proc)
+		add_inode(inode)
+		add_edge(inode, proc)
+	elif func == 'tcp_v4_rcv':
+		proc, saddr, sport, daddr, dport = a[1:]
+		add_proc(proc)
+	elif func == 'pstree':
+		proc, child = a[1:]
+		add_proc(proc)
+		add_proc(child)
+		add_edge(proc, child)
+	elif func == 'proc2so':
+		proc2so = marshal.load(open('proc2so.cache'))
 
-for l in open('netuse.result').readlines():
-	proc, port = l.strip().split('\t')
-	add_proc(proc)
-
-for l in open('pstree.result').readlines():
-	proc, child = l.strip().split('\t')
-	add_proc(proc)
-	add_proc(child)
-	add_edge(proc, child)
-	
 f = open('algo.graph', 'w+')
 for i in E:
 	for j in E[i]:
