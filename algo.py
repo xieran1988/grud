@@ -3,48 +3,56 @@
 import marshal, socket, sys
 from igraph import *
 
+if 0:
+	G = Graph.Full(n=4, directed=True)
+	for a in {'1':2, 2:3}:
+		print a
+	G.vs[1]['name'] = 'aa'
+	G.vs[2]['name'] = 'bb'
+	G.vs[1]['a'] = 1
+	print G.vs[1]
+	print G.pagerank()
+	sys.exit(0)
+
 def graph_init():
+	global G 
 	G = Graph(n=0, directed=True)
-	V = {}
-	return G, V
+	G.vs['name'] = []
 
 def proc2so_load():
-	return marshal.load(open('proc2so.cache'))
+	global proc2so
+	proc2so = marshal.load(open('proc2so.cache'))
+
+def add_node(name, **kw):
+	if name not in G.vs['name']:
+		G.add_vertices(1)
+		kw['name'] = name
+		for k in kw:
+			G.vs[G.vcount() - 1][k] = kw[k];
+		G[name] = G.vcount() - 1
 
 def add_inode(inode):
-	if inode not in V:
-		V[inode] = {'type': 'inode', 'val': inode, 'no': G.vcount()} 
-		G.add_vertices(1)
-	return V[inode]['no']
+	add_node(inode, cat='inode')
 
 def add_so(so):
-	if so not in V:
-		V[so] = {'type': 'so', 'val': so, 'no': G.vcount()}
-		G.add_vertices(1)
-	return V[so]['no']
+	add_node(so, cat='so')
 
 def add_proc(proc):
-	if proc not in V:
-		V[proc] = {'type': 'proc', 'val': proc, 'no': G.vcount()}
-		G.add_vertices(1)
-		if proc in proc2so:
-			G.add_edges([(V[proc]['no'], add_so(so)) for so in proc2so[proc]])
-	return V[proc]['no']
+	add_node(proc, cat='proc')
+	if proc in proc2so:
+		for so in proc2so[proc]:
+			add_so(so)
+			add_edge(proc, so)
 
 def add_edge(a, b):
-	na = V[a]['no']
-	nb = V[b]['no']
-	if na != nb:
-		G.add_edges((na, nb))
-
-def subject_rank():
-	return 
+	if a != b:
+		G.add_edges((G[a], G[b]))
 
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
 s.bind(('', 1900))
 so2so = marshal.load(open('so2so.cache'))
-proc2so = proc2so_load()
-G, V = graph_init()
+proc2so_load()
+graph_init()
 
 while 1:
 	msg, addr = s.recvfrom(65536)
@@ -55,7 +63,7 @@ while 1:
 		proc, inode = a[1:]
 		add_proc(proc)
 		add_inode(inode)
-		add_edge(inode, proc)
+		add_edge(proc, inode)
 	elif func == 'tcp_v4_rcv' or func == 'tcp_recvmsg':
 		proc, saddr, sport, daddr, dport = a[1:]
 		add_proc(proc)
@@ -63,15 +71,23 @@ while 1:
 		proc, child = a[1:]
 		add_proc(proc)
 		add_proc(child)
-		add_edge(proc, child)
+		add_edge(child, proc)
 	elif func == 'proc2so':
-		print func
-		proc2so = proc2so_load()
+#		print func
+		proc2so_load()
 	elif func == 'gengraph':
 		print func
-		print '-----------'
+		print '---- graph ----'
 		summary(G)
-		G, V = graph_init()
+		print '---- pagerank ----'
+		pr = G.pagerank()
+#		print [ v for v in G.vs.select(cat='so')][:25]
+		for i in map(lambda x: x[1], \
+				sorted([ (pr[i], G.vs[i]['name']) for i in range(len(pr)) ], reverse=True)[:25]) \
+				:
+			print i, pr[G[i]]
+		print '---------'
+		graph_init()
 
 '''
 f = open('algo.graph', 'w+')
