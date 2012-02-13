@@ -8,6 +8,17 @@ probe kernel.function("ext4_file_mmap")
 	printf("%s\t%s\t%x\n", probefunc(), execname(), ino);
 }
 
+probe kernel.function("ext4_readdir")
+{
+	if (@defined($filp->f_path->dentry)) {
+		ino = $filp->f_path->dentry->d_inode->i_ino;
+	} else {
+		ino = $filp->f_dentry->d_inode->i_ino;
+	}
+	printf("%s\t%s\t%x\n", probefunc(), execname(), ino);
+}
+
+
 probe tcp.receive, tcp.recvmsg {
 	printf("%s\t%s\t%s\t%d\t%s\t%d\n", probefunc(), execname(), saddr, sport, daddr, dport);
 }
