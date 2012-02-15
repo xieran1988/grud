@@ -18,9 +18,9 @@ def add_node(name, **kw):
 		dstat('nodes:'+kw['cat'])
 		G.add_vertices(1)
 		kw['name'] = name
-		for k in kw:
-			G.vs[G.vcount() - 1][k] = kw[k];
 		G[name] = G.vcount() - 1
+	for k in kw:
+		G.vs[G[name]][k] = kw[k]
 
 def add_inode(inode):
 	add_node(inode, cat='inode')
@@ -28,8 +28,8 @@ def add_inode(inode):
 def add_so(so):
 	add_node(so, cat='so')
 
-def add_proc(proc):
-	add_node(proc, cat='proc')
+def add_proc(proc, **kw):
+	add_node(proc, cat='proc', **kw)
 	if proc in proc2so:
 		for so in proc2so[proc]:
 			add_so(so)
@@ -61,7 +61,7 @@ while 1:
 	msg, addr = s.recvfrom(1024)
 	a = msg.strip().split('\t')
 	func = a[0]
-	if func == 'ext4_file_mmap' or func == 'ext4_readdir': 
+	if func == 'ext4_file_mmap': # or func == 'ext4_readdir': 
 		dstat('funcs:'+func)
 		proc, inode = a[1:]
 		add_proc(proc)
@@ -69,12 +69,14 @@ while 1:
 		add_edge(proc, inode)
 	elif func == 'tcp_v4_rcv' or func == 'tcp_recvmsg':
 		proc, saddr, sport, daddr, dport = a[1:]
-		dstat('funcs:'+func);
+#		dstat('funcs:'+func);
 		add_proc(proc)
 	elif func == 'pstree':
-		proc, child = a[1:]
-		dstat('funcs:'+func)
-		add_proc(proc)
+		proc, child, user = a[1:]
+#		dstat('funcs:'+func)
+		add_proc(proc, user=user)
+		if user == 'root':
+			add_proc(proc, tcb=1)
 		add_proc(child)
 		add_edge(child, proc)
 	elif func == 'proc2so':
@@ -90,7 +92,15 @@ while 1:
 		summary(G)
 		print '---- pagerank ----'
 		pr = G.pagerank()
-#		print [ v for v in G.vs.select(cat='so')][:25]
+
+		tot = len(G.vs.select(cat='proc'))
+		tcb = len(G.vs.select(tcb=1, cat='proc'))
+		dstat('tcb-proc:tcb', tcb)
+		dstat('tcb-proc:non-tcb', tot - tcb)
+
+		r = sum([ pr[i] for i in G.vs.select(tcb=1).indices ])
+		dstat('pagerank:pr', r)
+
 		for i in map(lambda x: x[1], \
 				sorted([ (pr[i], G.vs[i]['name']) for i in range(len(pr)) ], reverse=True)[:5]) \
 				:

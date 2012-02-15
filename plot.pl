@@ -6,7 +6,6 @@ my %png;
 while (<F>) {
 	chomp;
 	next if $. == 1;
-	print "$_: $.\n";
 	my ($c, $f) = split /:/;
 	$png{$c}++;
 	if ( ! -e "$c.pti") {

@@ -22,9 +22,9 @@ testcase:
 	- browse web
 	- play game
 	- watch movie
-	- at work
-	- copy files
-	- compile kernel
+	- at work (many proc)
+	- copy files (many inode)
+	  compile kernel 
 
 plot graph
 |

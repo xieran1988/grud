@@ -8,6 +8,6 @@ while true; do
 	echo proc2so | ./nc.pl 127.0.0.1 1900
 	./pstree.pl | ./nc.pl 127.0.0.1 1900
 	echo gengraph | ./nc.pl 127.0.0.1 1900
-	sleep 2
+	sleep 1
 done
 

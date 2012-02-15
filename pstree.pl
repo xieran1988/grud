@@ -1,11 +1,11 @@
 #!/usr/bin/perl
 
 my %h;
-open F, "sudo ps -eo comm,pid,ppid | sed 1d |";
+open F, "sudo ps -eo comm,pid,ppid,user | sed 1d |";
 while (<F>) {
 	chomp;
-	my ($comm, $pid, $ppid) = split /\s+/;
+	my ($comm, $pid, $ppid, $user) = split /\s+/;
 	$h{$pid} = $comm;
-	print "pstree\t$comm\t$h{$ppid}\n" if exists $h{$ppid};
+	print "pstree\t$comm\t$h{$ppid}\t$user\n" if exists $h{$ppid};
 }
 
