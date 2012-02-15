@@ -1,8 +1,0 @@
-
-probe begin {
-	printf("starts\n");
-}
-
-probe syscall.open {
-	printf("%s: %s\n", thread_indent(-1), argstr);
-}

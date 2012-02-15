@@ -1,5 +1,8 @@
 
-all: algo.graph
+
+all: 
+	gnuplot algo.pt
+	chromium-browser a.png
 
 force:
 
@@ -11,5 +14,6 @@ algo.graph: algo.py proc2so.cache so2so.cache
 
 algo-graph.dot: dot.pl algo.graph
 	./dot.pl < algo.graph > $@
+
 
 

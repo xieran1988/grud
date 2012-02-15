@@ -18,3 +18,21 @@ client node graphset:
 
 concern level: node attr
 
+testcase:
+	- browse web
+	- play game
+	- watch movie
+	- at work
+	- copy files
+	- compile kernel
+
+plot graph
+|
+|   ..   
+|  .  ...   
+| .      ... 
+|           .
++--------------
+
+
+
